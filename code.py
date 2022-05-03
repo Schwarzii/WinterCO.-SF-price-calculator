@@ -9,7 +9,7 @@ import browser.html as ht
 order = ht.TABLE(id='table')
 # fill = ht.TD(style={'width': '100%'})
 # fill = ht.TD()
-order <= ht.TR(ht.TH("顺丰快递费用计算器", colspan=5, style={'text-align': 'center', 'border-style': 'none'}))
+order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=5, style={'text-align': 'center', 'border-style': 'none'}))
 order <= ht.TR(ht.TD('出发地') + ht.INPUT(value='Jita', id='dep') + ht.TD('互换', id='switch', rowspan=2))
 order <= ht.TR(ht.TD('到达地') + ht.INPUT(value='4-HWWF', id='des'))
 order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume'))
@@ -27,6 +27,8 @@ document <= order
 # change = document['change']
 cost = document['cost']
 standard = document['standard']
+
+
 fee = 250
 lowest_fee = 5000000
 
@@ -76,7 +78,7 @@ def check_cost():
             adopt_standard = f'{fee} ISK/m³'
 
         if result < lowest_fee:  # Check lowest delivery fee
-            adopt_standard = f'运费不足5百万ISK按5百万ISK收取 (当前为{format(result, ",")} ISK)'
+            adopt_standard = f'运费不足5百万ISK按5百万ISK收取 (当前为{format(round(result, 2), ",")} ISK)'
             result = lowest_fee
 
         cost.text = format(round(result, 2), ',') + " ISK"
