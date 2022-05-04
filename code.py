@@ -1,11 +1,6 @@
 from browser import document
 import browser.html as ht
 
-# calc = ht.TABLE()
-# calc <= ht.TR(ht.TH(ht.DIV("0", id="result"), colspan=3) + ht.TD("C"))
-#
-# document <= calc
-
 route = {'Jita': {'4-HWWF': 250, 'Otsasai': 50, 'N5Y-4N': 500, 'Oijanen': 200},
          '4-HWWF': {'Jita': 60, 'Otsasai': 100, 'Oijanen': 125},
          'Otsasai': {'Jita': 50, '4-HWWF': 100},
@@ -29,22 +24,22 @@ order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=6, style
 order <= ht.TR(ht.TD('出发地') + departure + ht.A(station[departure.value], id='dep_station')
                + ht.TD('互换', id='switch', rowspan=2))
 order <= ht.TR(ht.TD('到达地') + arrival + ht.A(station[arrival.value], id='arr_station'))
-order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume'))
-order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral'))
+order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume') + ht.TD('m³'))
+order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral') + ht.TD('ISK'))
 order <= ht.TR(ht.TD('合同类型') + ht.INPUT(id='contract'))
-order <= ht.TR(ht.TD('支付运费') + ht.TH('-', id='cost'))
-order <= ht.TR(ht.TD('收费标准') + ht.TH('-', id='standard'))
+order <= ht.TR(ht.TD('收费标准', rowspan=2) + ht.A(ht.TD('当前线路价格') + ht.TH('250 ISK/m³', id='route_standard') + ht.TD('下行', id='stream')))
+order <= ht.TR(ht.A(ht.TD('额外计费方式') + ht.TH('-', id='other_fee')))
+order <= ht.TR(ht.TD('支付运费') + ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid'}) + ht.TD('ISK'))
+# , 'font-family': 'Palatino Linotype'
 # order <= ht.TR(ht.DIV('0', id='change'))
-
-# calc <= (ht.TR(ht.TD(x) for x in line) for line in lines)
 
 document <= order
 
 # change = document['change']
 cost = document['cost']
-standard = document['standard']
+route_standard = document['route_standard']
+add_fee = document['other_fee']
 
-fee = 250
 lowest_fee = 5000000
 
 
@@ -76,9 +71,13 @@ def dep_select(event):
     arr_option_change()
     document['arr_station'].text = station[arrival.value]
 
+    fee_regulation()
+
 
 def arr_select(event):
     document['arr_station'].text = station[arrival.value]
+
+    fee_regulation()
 
 
 def switch_des(event):
@@ -93,9 +92,69 @@ def switch_des(event):
 
     document['arr_station'].text = station[arrival.value]
 
+    fee_regulation()
+
+
+def route_fee():
+    dep, arr = departure.value, arrival.value
+    basic_fee = route[dep][arr]
+    upstream = True if arr == 'Jita' else False  # Upstream route or downstream
+    return basic_fee, upstream
+
+
+def fee_regulation():
+    volume_input = document['volume'].value
+    collateral_input = document['collateral'].value
+
+    # Route fee
+    basic_fee, upstream = route_fee()
+    route_standard.text = f'{basic_fee} ISK/m³'
+    if upstream:
+        route_standard.text += ' + 2%保证金'
+        document['stream'].text = '上行'
+    else:
+        document['stream'].text = '下行'
+
+    # Check null input
+    if volume_input != '':
+        volume_cost = int(volume_input.replace(',', '')) * basic_fee
+    else:
+        volume_cost = 0
+    if collateral_input != '':
+        collateral_cost = int(collateral_input.replace(',', '')) * 0.01
+    else:
+        collateral_cost = 0
+
+    # if
+    if collateral_cost == 0 and volume_cost == 0:
+        cost.text = '-'
+        add_fee.text = '-'
+    else:
+        if not upstream:  # Downstream route
+            if collateral_cost > volume_cost:
+                result = collateral_cost
+                adopt_standard = '1%保证金'
+            else:
+                result = volume_cost
+                adopt_standard = '-'
+        else:  # Upstream route
+            result = volume_cost + 2 * collateral_cost
+            adopt_standard = '-'
+
+        if result < lowest_fee:  # Check lowest delivery fee
+            adopt_standard = f'运费不足5百万ISK按5百万ISK收取 (当前为{format(round(result, 2), ",")} ISK)'
+            result = lowest_fee
+
+        cost.text = format(int(result), ',')
+        add_fee.text = adopt_standard
+
+    return basic_fee, upstream
+
 
 def volume_fee(event):
     volume_input = document['volume'].value
+
+    # fee, up_route = route_fee()
     if volume_input != '':
         volume_number = int(document['volume'].value.replace(',', ''))
 
@@ -106,44 +165,11 @@ def volume_fee(event):
         else:
             document['volume'].value = format(volume_number, ',')
 
-        cost.text = format(volume_number * fee, ',') + " isk"
-    check_cost()
-
-
-def check_cost():
-    volume_input = document['volume'].value
-    collateral_input = document['collateral'].value
-
-    if volume_input != '':
-        volume_cost = int(volume_input.replace(',', '')) * 250
-    else:
-        volume_cost = 0
-    if collateral_input != '':
-        collateral_cost = int(collateral_input.replace(',', '')) * 0.01
-    else:
-        collateral_cost = 0
-
-    if collateral_cost == 0 and volume_cost == 0:
-        cost.text = '-'
-        standard.text = '-'
-    else:
-        if collateral_cost > volume_cost:
-            result = collateral_cost
-            adopt_standard = '保证金1%'
-        else:
-            result = volume_cost
-            adopt_standard = f'{fee} ISK/m³'
-
-        if result < lowest_fee:  # Check lowest delivery fee
-            adopt_standard = f'运费不足5百万ISK按5百万ISK收取 (当前为{format(round(result, 2), ",")} ISK)'
-            result = lowest_fee
-
-        cost.text = format(round(result, 2), ',') + " ISK"
-        standard.text = adopt_standard
+    fee_regulation()  # Check if
 
 
 def collateral_fee(event):
-    check_cost()
+    fee_regulation()
 
     if document['collateral'] != '':
         collateral_number = int(document['collateral'].value.replace(',', ''))
