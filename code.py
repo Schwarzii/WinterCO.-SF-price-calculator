@@ -6,12 +6,29 @@ import browser.html as ht
 #
 # document <= calc
 
+route = {'Jita': {'4-HWWF': 250, 'Otsasai': 50, 'N5Y-4N': 500, 'Oijanen': 200},
+         '4-HWWF': {'Jita': 60, 'Otsasai': 100, 'Oijanen': 125},
+         'Otsasai': {'Jita': 50, '4-HWWF': 100},
+         'N5Y-4N': {'Jita': 500},
+         'Oijanen': {'Jita': 300, '4-HWWF': 125}
+         }
+
+station = {'Jita': 'IV - Moon 4 - Caldari Navy Assembly Plant',
+           '4-HWWF': 'Winter CO. Central Station',
+           # 'RF-X7V - Forums.WinTerCo.org',
+           'Otsasai': 'Fuxi Prime - Home for Ever',
+           'N5Y-4N': 'xingcheng',
+           'Oijanen': 'Lowsec jita'}
+
 order = ht.TABLE(id='table')
-# fill = ht.TD(style={'width': '100%'})
-# fill = ht.TD()
-order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=5, style={'text-align': 'center', 'border-style': 'none'}))
-order <= ht.TR(ht.TD('出发地') + ht.INPUT(value='Jita', id='dep') + ht.TD('互换', id='switch', rowspan=2))
-order <= ht.TR(ht.TD('到达地') + ht.INPUT(value='4-HWWF', id='des'))
+
+departure = ht.SELECT(ht.OPTION(station) for station in route.keys())
+arrival = ht.SELECT(ht.OPTION(station) for station in route['Jita'].keys())
+
+order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=6, style={'text-align': 'center', 'border-style': 'none'}))
+order <= ht.TR(ht.TD('出发地') + departure + ht.A(station[departure.value], id='dep_station')
+               + ht.TD('互换', id='switch', rowspan=2))
+order <= ht.TR(ht.TD('到达地') + arrival + ht.A(station[arrival.value], id='arr_station'))
 order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume'))
 order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral'))
 order <= ht.TR(ht.TD('合同类型') + ht.INPUT(id='contract'))
@@ -23,14 +40,58 @@ order <= ht.TR(ht.TD('收费标准') + ht.TH('-', id='standard'))
 
 document <= order
 
-
 # change = document['change']
 cost = document['cost']
 standard = document['standard']
 
-
 fee = 250
 lowest_fee = 5000000
+
+
+# Generate available destinations depending on departure
+def arr_option_change():
+    document['dep_station'].text = station[departure.value]
+    ava_des = list(route[departure.value].keys())  # Available destinations
+
+    diff = abs(len(ava_des) - len(arrival.options))
+    now_opt = len(arrival.options)
+
+    # Make the length of option list and new option list the same
+    if now_opt < len(ava_des):
+        for i in range(diff):
+            arrival.options.add(ht.OPTION(''))
+
+    if now_opt > len(ava_des):
+        for i in range(diff):
+            arrival.options.remove('0')
+
+    # Change every elements in the option list
+    for i in range(len(ava_des)):
+        arrival.options[i] = ht.OPTION(ava_des[i])
+
+    return ava_des
+
+
+def dep_select(event):
+    arr_option_change()
+    document['arr_station'].text = station[arrival.value]
+
+
+def arr_select(event):
+    document['arr_station'].text = station[arrival.value]
+
+
+def switch_des(event):
+    current_dep, current_arr = departure.value, arrival.value
+    arr_in_dep = list(route.keys()).index(current_arr)  # Index of current arrival in departure option list
+    departure.options[arr_in_dep].selected = True
+
+    new_arr_opt = arr_option_change()  # Check available destinations after switch
+
+    new_arr_idx = list(new_arr_opt).index(current_dep)  # Index of the original departure in new arrival option list
+    arrival.options[new_arr_idx].selected = True  # Select original departure
+
+    document['arr_station'].text = station[arrival.value]
 
 
 def volume_fee(event):
@@ -47,10 +108,6 @@ def volume_fee(event):
 
         cost.text = format(volume_number * fee, ',') + " isk"
     check_cost()
-
-
-def switch_des(event):
-    document['dep'].value, document['des'].value = document['des'].value, document['dep'].value
 
 
 def check_cost():
@@ -93,9 +150,8 @@ def collateral_fee(event):
         document['collateral'].value = format(collateral_number, ',')
 
 
+departure.bind('change', dep_select)
+arrival.bind('change', arr_select)
 document['switch'].bind('click', switch_des)
 document['collateral'].bind('keyup', collateral_fee)
 document['volume'].bind('keyup', volume_fee)
-
-
-
