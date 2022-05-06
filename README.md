@@ -1,5 +1,17 @@
 # Winter Co. SF-price-calculator
 
+从Gitee平台访问：https://schwarzi.gitee.io/winterco.-sf-price-calculator/interface.html
+
+## 2022/5/6 V1.1.1
+
+New features: add buttons to switch contract type (not link with the fee)
+Adjustment: adjust cell background colors
+
+新增内容：添加转换合同类型的按钮（还未与计费进行关联）
+调整：微调字块背景颜色
+
+Gitee pages完成部署
+
 ## 2022/5/5 V1.1.0
 
 New features:
