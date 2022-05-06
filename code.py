@@ -15,9 +15,18 @@ station = {'Jita': 'IV - Moon 4 - Caldari Navy Assembly Plant',
            'N5Y-4N': 'xingcheng',
            'Oijanen': 'Lowsec jita'}
 
+# Global colors
+honghui = '#82878c'  # 红灰
+maolv = '#155461'  # 毛绿
+cuilv = '#006e5f'  # 翠绿
+tanxiang = '#dc943b'  # 檀香色
+zhubiao = '#e35c3e'  # 朱磦
+zaohong = '#89303f'  # 枣红
+
 order = ht.TABLE(id='table')
 sup_3 = ht.SUP('3', style={'font-size': '0.8em', 'color': 'aliceblue'})
 sup_31 = ht.SUP('3', style={'font-size': '0.8em'})
+sup_32 = ht.SUP('3', style={'font-size': '0.8em', 'color': 'aliceblue'})
 input_width = 690 + 60 + 4
 
 departure = ht.SELECT(ht.OPTION(station) for station in route.keys())
@@ -25,33 +34,52 @@ arrival = ht.SELECT(ht.OPTION(station) for station in route['Jita'].keys())
 
 order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=6, style={'text-align': 'center', 'border-style': 'none'}))
 order <= ht.TR(ht.TD('出发地') + departure + ht.A(station[departure.value], id='dep_station')
-               + ht.TD('互换', id='switch', rowspan=2, style={'background-color': '#dc943b'}))  # 檀香色
+               + ht.TD('互换', id='switch', rowspan=2, style={'background-color': tanxiang}))
 order <= ht.TR(ht.TD('到达地') + arrival + ht.A(station[arrival.value], id='arr_station'))
-order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume') + ht.TD('m' + sup_3))
+order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume') + ht.TD('m' + sup_3, style={'padding': '10px 30px 10px 30px'}))
 order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral') + ht.TD('ISK'))
-order <= ht.TR(ht.TD('合同类型') + ht.INPUT(id='contract') + ht.TD(''))
+order <= ht.TR(ht.TD('合同类型') +
+               ht.TD(ht.TD('标准合同', id='s_contract', style={'width': f'{input_width / 2- 60 - 1}px', 'background-color': maolv}) +
+                     ht.TD('加急合同 (15000m' + sup_32 + '标准)', id='a_contract',
+                           style={'width': f'{input_width / 2 + 120 - 60 - 1}px',
+                                  'position': 'relative',
+                                  'right': '-2px',
+                                  'padding': '10px 30px 10px 30px',
+                                  'background-color': honghui}),
+                     colspan=2, style={'padding': '0px 0px 0px 0px', 'background-color': 'unset'})
+               # + ht.TD('')
+               )
 order <= ht.TR(ht.TD('收费标准', rowspan=2) +
                ht.A(ht.TD('当前线路价格', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
                     ht.TH('250 ISK/m' + sup_31, id='route_standard',
                           style={'width': f'{input_width - 187 - 120 - 120 - 4}px'}),
-                    # ,  # 毛绿
                     style={'padding-left': '0px'}) +
-               ht.TD('下行线路', id='stream', rowspan=2, style={'width': '60px', 'background-color': '#155461'}))
+               ht.TD('下行线路', id='stream', rowspan=2, style={'width': '60px', 'background-color': maolv}))
 order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px', 'width': '177px', 'height': '66px'}) +
-                    ht.TH('-', id='other_fee', style={'width': f'{input_width - 187 - 60 - 4}px', 'vertical-align': 'middle', 'line-height': '1.3', 'white-space': 'pre-line'}), style={'padding-left': '0px'}))
+                    ht.TH('-', id='other_fee',
+                          style={'width': f'{input_width - 187 - 60 - 4}px',
+                                 'vertical-align': 'middle',
+                                 'line-height': '1.3',
+                                 'white-space': 'pre-line'}),
+                    style={'padding-left': '0px'}))
 order <= ht.TR(ht.TD('支付运费') +
-               ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': '#e35c3e'}) +  # 朱磦
+               ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': zaohong}) +
                ht.TD('ISK'))
 # , 'font-family': 'Palatino Linotype'
 # order <= ht.TR(ht.DIV(fee.children))
 
 document <= order
 
-# change = document['change']
+# Global elements
 cost = document['cost']
 route_standard = document['route_standard']
 add_fee = document['other_fee']
 
+# Global variables
+accelerated = False
+selected_color = maolv
+unselected_color = honghui
+highlight_color = zaohong
 lowest_fee = 5000000
 
 
@@ -191,8 +219,20 @@ def collateral_fee(event):
         document['collateral'].value = format(collateral_number, ',')
 
 
+def standard_courier(event):
+    document['s_contract'].style.backgroundColor = selected_color
+    document['a_contract'].style.backgroundColor = unselected_color
+
+
+def accelerated_courier(event):
+    document['s_contract'].style.backgroundColor = unselected_color
+    document['a_contract'].style.backgroundColor = highlight_color
+
+
 departure.bind('change', dep_select)
 arrival.bind('change', arr_select)
 document['switch'].bind('click', switch_des)
 document['collateral'].bind('keyup', collateral_fee)
 document['volume'].bind('keyup', volume_fee)
+document['s_contract'].bind('click', standard_courier)
+document['a_contract'].bind('click', accelerated_courier)
