@@ -40,7 +40,7 @@ order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume') + ht.TD('m' + sup_3
 order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral') + ht.TD('ISK'))
 order <= ht.TR(ht.TD('合同类型') +
                ht.TD(ht.TD('标准合同', id='s_contract', style={'width': f'{input_width / 2- 60 - 1}px', 'background-color': maolv}) +
-                     ht.TD('加急合同 (15000m' + sup_32 + '标准)', id='a_contract',
+                     ht.TD('加急合同 (15,000 m' + sup_32 + '标准)', id='a_contract',
                            style={'width': f'{input_width / 2 + 120 - 60 - 1}px',
                                   'position': 'relative',
                                   'right': '-2px',
