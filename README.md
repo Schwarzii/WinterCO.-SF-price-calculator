@@ -1,5 +1,27 @@
 # Winter Co. SF-price-calculator
 
+## 2022/5/5 V1.1.0
+
+New features:
+
+- New layout and colors
+- Use SUP tag to show superscipt "3"
+- Support different route prices
+- Support upstream/downstream route prices and indication
+- Indicate route fee and charge standard separately
+
+Contract type will be implemented in the next version
+
+新增内容：
+
+- 新布局及颜色
+- 使用SUP标签来表示上标“3”
+- 支持不同线路计费
+- 支持上行/下行线路不同计费及上下行标示
+- 分开标示线路价格及计费标准
+
+加急合同功能将在下版本中实装
+
 ## 2022/5/4 V1.0.1
 Update:
 
