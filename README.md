@@ -2,10 +2,34 @@
 
 从Gitee平台访问：https://schwarzi.gitee.io/winterco.-sf-price-calculator/interface.html
 
+## 2022/5/7 V1.2.0
+
+Issue fix and amendment:
+
+- Support decimals input for number inputs
+- Limit the maximum amount of digit input for collateral to 14
+
+New features:
+
+- Implement accelerated contract type option
+- Add new text for fee standard
+- Support freely adding or deleting digits at any positions within a number input
+
+修复与改动：
+
+- 数字输入支持小数点输入与代入计算
+- 保证金条目限制最大输入14位数字
+
+新增内容：
+- 实现加急合同功能
+- 新增计费规则文本
+- 数字输入支持在数字的任意位置键入或删除数字
+
 ## 2022/5/6 V1.1.1
 
 - Add buttons to switch contract type (not link with the fee)
 - Adjust cell background colors
+
 
 - 新增切换合同类型的按钮（还未与计费进行关联）
 - 微调字块背景颜色
