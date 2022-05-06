@@ -4,11 +4,11 @@
 
 ## 2022/5/6 V1.1.1
 
-New features: add buttons to switch contract type (not link with the fee)
-Adjustment: adjust cell background colors
+- Add buttons to switch contract type (not link with the fee)
+- Adjust cell background colors
 
-新增内容：添加转换合同类型的按钮（还未与计费进行关联）
-调整：微调字块背景颜色
+- 新增切换合同类型的按钮（还未与计费进行关联）
+- 微调字块背景颜色
 
 Gitee pages完成部署
 
@@ -55,7 +55,7 @@ New features:
 - 不同线路不同计价 （代码中已添加为字典，未完全与线路选择进行关联）
 - 线路选择
 - 根据已选择的起点自动给出可到达的终点
-- 起点与终点的交换
+- 起点与终点的互换
 
 
 
