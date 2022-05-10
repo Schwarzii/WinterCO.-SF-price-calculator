@@ -68,7 +68,7 @@ order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px',
                                  'line-height': '1.3',
                                  'white-space': 'pre-line'}),
                     Class='charging_rule_A'))
-order <= ht.TR(ht.TD('送达时间') + ht.TH('2天', id='express_time', Class='time') +
+order <= ht.TR(ht.TD('送达时间') + ht.TH('2天内', id='express_time', Class='time') +
                ht.TD('主线路', id='route_tag', Class='route'))
 order <= ht.TR(ht.TD('支付运费', Class='important') +
                ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': qianghong}) +
