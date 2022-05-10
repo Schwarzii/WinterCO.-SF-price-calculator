@@ -2,6 +2,32 @@
 
 从Gitee平台访问：https://schwarzi.gitee.io/winterco.-sf-price-calculator/interface.html
 
+## 2022/5/10 V1.2.1
+
+Amendments:
+
+- Update routes
+- Update charging rules
+- Update minimum charging fee
+- Change reddish color
+
+New feature:
+
+- Add minimum charging fee display
+- Add maximum delivery time display
+
+改动：
+
+- 更新线路
+- 更新计费规则
+- 更新起步价
+- 更换红色颜色
+
+新增内容：
+
+- 新增线路起步价显示
+- 新增最大送达时间（时效）显示
+
 ## 2022/5/7 V1.2.0
 
 Issue fix and amendment:
