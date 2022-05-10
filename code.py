@@ -23,11 +23,10 @@ cuilv = '#006e5f'  # 翠绿
 tanxiang = '#dc943b'  # 檀香色
 zhubiao = '#e35c3e'  # 朱磦
 zaohong = '#89303f'  # 枣红
+qianghong = '#902A1B'  # 墙红，从故宫照片提取
+default_color = '#282e55'
 
 order = ht.TABLE(id='table')
-sup_3 = ht.SUP('3', style={'font-size': '0.8em', 'color': 'aliceblue'})
-sup_31 = ht.SUP('3', style={'font-size': '0.8em'})
-sup_32 = ht.SUP('3', style={'font-size': '0.8em', 'color': 'aliceblue'})
 input_width = 690 + 60 + 4
 
 departure = ht.SELECT(ht.OPTION(station) for station in route.keys())
@@ -37,7 +36,9 @@ order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=6, style
 order <= ht.TR(ht.TD('出发地') + departure + ht.A(station[departure.value], id='dep_station')
                + ht.TD('互换', id='switch', rowspan=2, style={'background-color': tanxiang}))
 order <= ht.TR(ht.TD('到达地') + arrival + ht.A(station[arrival.value], id='arr_station'))
-order <= ht.TR(ht.TD('物品体积') + ht.INPUT(id='volume') + ht.TD('m' + sup_3, style={'padding': '10px 30px 10px 30px'}))
+order <= ht.TR(ht.TD('物品体积') +
+               ht.INPUT(id='volume') +
+               ht.TD('m' + ht.SUP('3', Class='sup_white'), style={'padding': '10px 30px 10px 30px'}))
 order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral', maxlength=18) + ht.TD('ISK'))
 order <= ht.TR(ht.TD('合同类型') +
                ht.TD(ht.TD('标准合同', id='s_contract',
@@ -53,23 +54,25 @@ order <= ht.TR(ht.TD('合同类型') +
                )
 order <= ht.TR(ht.TD('收费标准', rowspan=3) +
                ht.A(ht.TD('当前线路价格', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
-                    ht.TH('250 ISK/m' + sup_31, id='route_standard',
+                    ht.TH('250 ISK/m' + ht.SUP('3'), id='route_standard',
                           style={'width': f'{input_width - 187 - 60 - 4}px'}),
-                    style={'padding-left': '1px', 'border-spacing': '1px'}) +
+                    Class='charging_rule_A') +
                ht.TD('下行线路', id='stream', rowspan=3, style={'width': '60px', 'background-color': maolv}))
 order <= ht.TR(ht.A(ht.TD('线路起步价', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
                     ht.TH('10M ISK (10,000,000 ISK)', id='min_fee',
                           style={'width': f'{input_width - 187 - 60 - 4}px'}),
-                    style={'padding-left': '1px', 'border-spacing': '1px'}))
+                    Class='charging_rule_A'))
 order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px', 'width': '177px', 'height': '68px'}) +
                     ht.TH('-', id='other_fee',
                           style={'width': f'{input_width - 187 - 60 - 4}px',
                                  'line-height': '1.3',
                                  'white-space': 'pre-line'}),
-                    style={'padding-left': '1px', 'border-spacing': '1px'}))
-order <= ht.TR(ht.TD('支付运费') +
-               ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': zaohong}) +
-               ht.TD('ISK'))
+                    Class='charging_rule_A'))
+order <= ht.TR(ht.TD('送达时间') + ht.TH('2天', id='express_time', Class='time') +
+               ht.TD('主线路', id='route_tag', Class='route'))
+order <= ht.TR(ht.TD('支付运费', Class='important') +
+               ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': qianghong}) +
+               ht.TD('ISK', Class='important'))
 # , 'font-family': 'Palatino Linotype'
 pop = ht.DIV('yy', role='alert')
 
@@ -79,11 +82,13 @@ document <= order
 cost = document['cost']
 route_standard = document['route_standard']
 add_fee = document['other_fee']
+route_tag = document['route_tag']
+express_time = document['express_time']
 
 # Global variables
 selected_color = maolv
 unselected_color = honghui
-highlight_color = zaohong
+highlight_color = qianghong
 
 accelerated = False
 upstream = False
@@ -154,9 +159,23 @@ def switch_des(event):
 
 # Calculate required unit fee defined by routes
 def route_fee():
-    global upstream  # Change global upstream status
+    global upstream  # Change global upstream status and category of route
     dep, arr = departure.value, arrival.value
     basic_fee, upstream, minimum_fee_coe = route[dep][arr]
+
+    if dep == 'Jita' and arr == '4-HWWF':
+        route_tag.text = '主线路'
+        express_time.text = '2天'
+    else:
+        route_tag.text = '常规线'
+        express_time.text = '7天'
+    if accelerated:
+        express_time.text = '1天 (加急合同)'
+        express_time.style.color = highlight_color
+        express_time.style.borderColor = highlight_color
+    else:
+        express_time.style.color = default_color
+        express_time.style.borderColor = maolv
     return basic_fee, minimum_fee_coe
 
 
@@ -168,10 +187,10 @@ def fee_regulation():
     # Route fee
     basic_fee, minimum_fee_coe = route_fee()
     route_standard.text = f'{basic_fee} ISK/m'
-    route_standard.appendChild(ht.SUP('3', style={'font-size': '0.8em'}))
+    route_standard.appendChild(ht.SUP('3'))
 
     if upstream:
-        route_standard.insertAdjacentText('beforeend', ' + 1%保证金 (保证金 > 5B时)')
+        route_standard.insertAdjacentText('beforeend', ' + 1%保证金 (仅保证金 > 5B时)')
         document['stream'].text = '上行线路'
     else:
         document['stream'].text = '下行线路'
@@ -217,10 +236,12 @@ def fee_regulation():
                 result = volume_cost
                 adopt_standard = '线路计费 (不加收保证金)'
 
-        if result < minimum_fee_coe * m:  # Check lowest delivery fee
-            adopt_standard = f'未达到线路起步价按起步价收取 \n(当前为{format(round(result, 2), ",")} ISK)'
+        # Check lowest delivery fee
+        if result < minimum_fee_coe * m:
+            adopt_standard = f'未达到线路起步价按起步价收取 \n(当前为{format(int(result), ",")} ISK)'
             result = minimum_fee_coe * m
 
+        # Display result and charging rule
         cost.text = format(int(result), ',')
         if not accelerated:
             add_fee.text = adopt_standard
@@ -230,8 +251,8 @@ def fee_regulation():
             else:
                 priority = ''
             add_fee.text = priority + f'加急合同 ({format(volume_input, ",")} m'
-            add_fee.appendChild(ht.SUP('3', style={'font-size': '0.8em'}))
-            add_fee.insertAdjacentText('beforeend', '标准体积运费)')
+            add_fee.appendChild(ht.SUP('3'))
+            add_fee.insertAdjacentText('beforeend', ' 标准体积运费)')
 
 
 # Split input number to integer part and decimals part
