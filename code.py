@@ -165,12 +165,12 @@ def route_fee():
 
     if dep == 'Jita' and arr == '4-HWWF':
         route_tag.text = '主线路'
-        express_time.text = '2天'
+        express_time.text = '2天内'
     else:
         route_tag.text = '常规线'
-        express_time.text = '7天'
+        express_time.text = '7天内'
     if accelerated:
-        express_time.text = '1天 (加急合同)'
+        express_time.text = '1天内 (加急合同)'
         express_time.style.color = highlight_color
         express_time.style.borderColor = highlight_color
     else:
