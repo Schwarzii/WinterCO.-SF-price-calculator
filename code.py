@@ -1,18 +1,19 @@
 from browser import document, alert
 import browser.html as ht
 
-route = {'Jita': {'4-HWWF': 250, 'Otsasai': 50, 'N5Y-4N': 500, 'Oijanen': 200},
-         '4-HWWF': {'Jita': 60, 'Otsasai': 100, 'Oijanen': 125},
-         'Otsasai': {'Jita': 50, '4-HWWF': 100},
-         'N5Y-4N': {'Jita': 500},
-         'Oijanen': {'Jita': 300, '4-HWWF': 125}
-         }
+route = {'Jita': {'4-HWWF': [350, False, 10], 'Otsasai': [250, False, 25], 'K3JR-J': [650, False, 25], 'Oijanen': [500, False, 25]},
+         '4-HWWF': {'Jita': [350, True, 10], 'Otsasai': [250, False, 25], 'Oijanen': [125, False, 25]},
+         'Otsasai': {'Jita': [250, True, 25], '4-HWWF': [250, True, 25]},
+         'K3JR-J': {'Jita': [650, True, 25]},
+         'Oijanen': {'Jita': [700, True, 25], '4-HWWF': [125, True, 25]}
+         }  # [Route fee, upstream, minimum fee]
 
 station = {'Jita': 'IV - Moon 4 - Caldari Navy Assembly Plant',
            '4-HWWF': 'WinterCo. Central Station',
-           # 'RF-X7V - Forums.WinTerCo.org',
+           'RF-X7V': 'Forums.WinTerCo.org',
            'Otsasai': 'Fuxi Prime - Home for Ever',
            'N5Y-4N': 'xingcheng',
+           'K3JR-J': "Teski's home",
            'Oijanen': 'Lowsec jita'}
 
 # Global colors
@@ -50,23 +51,27 @@ order <= ht.TR(ht.TD('合同类型') +
                      colspan=2, style={'padding': '0px 0px 0px 0px', 'background-color': 'unset'})
                # + ht.TD('')
                )
-order <= ht.TR(ht.TD('收费标准', rowspan=2) +
+order <= ht.TR(ht.TD('收费标准', rowspan=3) +
                ht.A(ht.TD('当前线路价格', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
                     ht.TH('250 ISK/m' + sup_31, id='route_standard',
-                          style={'width': f'{input_width - 187 - 120 - 120 - 4}px'}),
-                    style={'padding-left': '0px'}) +
-               ht.TD('下行线路', id='stream', rowspan=2, style={'width': '60px', 'background-color': maolv}))
+                          style={'width': f'{input_width - 187 - 60 - 4}px'}),
+                    style={'padding-left': '1px', 'border-spacing': '1px'}) +
+               ht.TD('下行线路', id='stream', rowspan=3, style={'width': '60px', 'background-color': maolv}))
+order <= ht.TR(ht.A(ht.TD('线路起步价', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
+                    ht.TH('10M ISK (10,000,000 ISK)', id='min_fee',
+                          style={'width': f'{input_width - 187 - 60 - 4}px'}),
+                    style={'padding-left': '1px', 'border-spacing': '1px'}))
 order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px', 'width': '177px', 'height': '68px'}) +
                     ht.TH('-', id='other_fee',
                           style={'width': f'{input_width - 187 - 60 - 4}px',
-                                 'vertical-align': 'middle',
                                  'line-height': '1.3',
                                  'white-space': 'pre-line'}),
-                    style={'padding-left': '0px'}))
+                    style={'padding-left': '1px', 'border-spacing': '1px'}))
 order <= ht.TR(ht.TD('支付运费') +
                ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': zaohong}) +
                ht.TD('ISK'))
 # , 'font-family': 'Palatino Linotype'
+pop = ht.DIV('yy', role='alert')
 
 document <= order
 
@@ -79,10 +84,13 @@ add_fee = document['other_fee']
 selected_color = maolv
 unselected_color = honghui
 highlight_color = zaohong
+
 accelerated = False
 upstream = False
+
+alert_position = 0
 collateral_full = ''
-lowest_fee = 5000000
+m = 1e6  # 1 million
 
 
 # Generate available destinations depending on departure
@@ -128,6 +136,7 @@ def arr_select(event):
 
 # Switch between the chosen departure station and destination station
 def switch_des(event):
+
     current_dep, current_arr = departure.value, arrival.value
     arr_in_dep = list(route.keys()).index(current_arr)  # Index of current arrival in departure option list
     departure.options[arr_in_dep].selected = True
@@ -147,9 +156,8 @@ def switch_des(event):
 def route_fee():
     global upstream  # Change global upstream status
     dep, arr = departure.value, arrival.value
-    basic_fee = route[dep][arr]
-    upstream = True if arr == 'Jita' else False  # Upstream route or downstream
-    return basic_fee
+    basic_fee, upstream, minimum_fee_coe = route[dep][arr]
+    return basic_fee, minimum_fee_coe
 
 
 # Calculation total fee needed to charge
@@ -158,20 +166,23 @@ def fee_regulation():
     collateral_input = document['collateral'].value
 
     # Route fee
-    basic_fee = route_fee()
+    basic_fee, minimum_fee_coe = route_fee()
     route_standard.text = f'{basic_fee} ISK/m'
     route_standard.appendChild(ht.SUP('3', style={'font-size': '0.8em'}))
 
     if upstream:
-        route_standard.insertAdjacentText('beforeend', ' + 2%保证金')
+        route_standard.insertAdjacentText('beforeend', ' + 1%保证金 (保证金 > 5B时)')
         document['stream'].text = '上行线路'
     else:
         document['stream'].text = '下行线路'
 
+    document['min_fee'].text = f'{minimum_fee_coe}M ISK ({format(int(minimum_fee_coe * m), ",")} ISK)'
+
     # Check null input
     if volume_input != '':
         volume_input = float(volume_input.replace(',', ''))  # Change type of volume input to float
-        if accelerated:  # Redefine volume input for accelerated contract
+        # Redefine volume input for accelerated contract
+        if accelerated:
             if volume_input <= 150000:
                 volume_input = 150000
             elif 150000 < volume_input <= 250000:
@@ -186,24 +197,29 @@ def fee_regulation():
     else:
         collateral_cost = 0
 
+    # Calculate total fee
     if collateral_cost == 0 and volume_cost == 0:
         cost.text = '-'
         add_fee.text = '-'
     else:
         if not upstream:  # Downstream route
-            if collateral_cost > volume_cost:
+            if collateral_cost > volume_cost:  # If high collateral applicable
                 result = collateral_cost
                 adopt_standard = '1%保证金'
             else:
                 result = volume_cost
                 adopt_standard = '线路计费'
         else:  # Upstream route
-            result = volume_cost + 2 * collateral_cost
-            adopt_standard = '线路计费'
+            if collateral_cost > 5e7:  # Check if collateral is taken into account
+                result = volume_cost + collateral_cost
+                adopt_standard = '线路计费 (加收保证金)'
+            else:
+                result = volume_cost
+                adopt_standard = '线路计费 (不加收保证金)'
 
-        if result < lowest_fee:  # Check lowest delivery fee
-            adopt_standard = f'运费不足5百万ISK按5百万ISK收取 \n(当前为{format(round(result, 2), ",")} ISK)'
-            result = lowest_fee
+        if result < minimum_fee_coe * m:  # Check lowest delivery fee
+            adopt_standard = f'未达到线路起步价按起步价收取 \n(当前为{format(round(result, 2), ",")} ISK)'
+            result = minimum_fee_coe * m
 
         cost.text = format(int(result), ',')
         if not accelerated:
@@ -248,7 +264,7 @@ def volume_fee(event):
             # Compensation for adding or deleting comma
             if len(document['volume'].value) > input_len:
                 cursor += 1
-            elif len(document['volume'].value) < input_len:
+            elif len(document['volume'].value) < input_len and cursor > 0:
                 cursor -= 1
             # Move cursor to the last typing position
             document['volume'].selectionStart = cursor
@@ -275,7 +291,7 @@ def collateral_fee(event):
             # Compensation for adding or deleting comma
             if len(document['collateral'].value) > input_len:
                 cursor += 1
-            elif len(document['collateral'].value) < input_len:
+            elif len(document['collateral'].value) < input_len and cursor > 0:
                 cursor -= 1
             # Move cursor to the last typing position
             document['collateral'].selectionStart = cursor
