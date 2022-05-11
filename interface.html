@@ -11,6 +11,37 @@
     font-weight: normal;
     font-size: 1.1em;
     color: #282e55;
+    /*color: aliceblue;*/
+}
+body{
+    background-color: #eedecc;
+    background-image: url("/Background_texture/cloud_15.png");
+    min-height: 100%;
+    margin: 0;
+}
+#table{
+    position: relative;
+    /*top: 100px;*/
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    /*margin-right: auto;*/
+    /*clear: both;*/
+    /*background-color: rgba(255, 255, 255, 0.8);*/
+}
+.shadow{
+    /*position: relative;*/
+    /*top: 0;*/
+    /*left: 0;*/
+    /*margin-top: -1000px;*/
+    margin-left: auto;
+    margin-right: auto;
+    /*clear: both;*/
+    width: 1080px;
+    height: 100vh;
+    /*min-height: 100vh;*/
+    /*height: 2000px;*/
+    background: rgba(255, 255, 255, 0.5);
 }
 td{
     background-color: #006e5f;
@@ -34,25 +65,29 @@ th{
     border: 2px;
 }
 input{
-    margin-top: 3px;
+    margin-top: 4px;
     width: 690px;
     padding: 10px 30px 10px 30px;
     text-align: left;
     vertical-align: middle;
     margin-left: 2px;
-}
-#table{
-    margin: auto;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #006e5f;
+    background-color: transparent;
 }
 select{
     width: 187px;
     padding: 10px 30px 10px 30px;
     font-family: "Century Gothic";
     margin-left: 2px;
+    border-color: #006e5f;
+    background-color: transparent;
 }
 option{
     font-family: "Century Gothic";
     font-size: 1.05em;
+    /*background-color: transparent;*/
 }
 A{
     padding-left: 20px;
@@ -64,11 +99,27 @@ SUP{
 .sup_white{
     color: aliceblue;
 }
+.title{
+    text-align: center;
+    font-size: 1.2em;
+    /*border: none;*/
+    /*border-style: solid;*/
+    /*border-color: #b1c5b4;*/
+    padding-top: 20px;
+    padding-bottom: 20px;
+    /*background-color: #b1c5b4;*/
+    border-bottom-style: solid;
+    border-top-style: solid;
+    border-color: #006e5f;
+    border-radius: 8px;
+    position: relative;
+    top: -20px;
+}
 .charging_rule_A{
     padding-left: 1px;
     border-spacing: 1px;
 }
-.route{
+.route_tag{
     background-color: #155461;
     padding: 15px 0 15px 0;
 }

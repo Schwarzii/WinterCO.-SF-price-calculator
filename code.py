@@ -1,4 +1,4 @@
-from browser import document, alert
+from browser import document, alert, window
 import browser.html as ht
 
 route = {'Jita': {'4-HWWF': [350, False, 10], 'Otsasai': [250, False, 25], 'K3JR-J': [650, False, 25], 'Oijanen': [500, False, 25]},
@@ -31,8 +31,7 @@ input_width = 690 + 60 + 4
 
 departure = ht.SELECT(ht.OPTION(station) for station in route.keys())
 arrival = ht.SELECT(ht.OPTION(station) for station in route['Jita'].keys())
-
-order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=6, style={'text-align': 'center', 'border-style': 'none'}))
+order <= ht.TR(ht.TH("凛冬联盟顺丰快递费用计算器", colspan=6, Class='title'))
 order <= ht.TR(ht.TD('出发地') + departure + ht.A(station[departure.value], id='dep_station')
                + ht.TD('互换', id='switch', rowspan=2, style={'background-color': tanxiang}))
 order <= ht.TR(ht.TD('到达地') + arrival + ht.A(station[arrival.value], id='arr_station'))
@@ -69,14 +68,18 @@ order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px',
                                  'white-space': 'pre-line'}),
                     Class='charging_rule_A'))
 order <= ht.TR(ht.TD('送达时间') + ht.TH('2天内', id='express_time', Class='time') +
-               ht.TD('主线路', id='route_tag', Class='route'))
+               ht.TD('主线路', id='route_tag', Class='route_tag'))
 order <= ht.TR(ht.TD('支付运费', Class='important') +
                ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': qianghong}) +
                ht.TD('ISK', Class='important'))
-# , 'font-family': 'Palatino Linotype'
 pop = ht.DIV('yy', role='alert')
 
 document <= order
+table_margin_top = int(window.getComputedStyle(document["table"]).marginTop.replace('px', ''))
+
+background = ht.DIV('', Class='shadow', style={'margin-top': f'-{document["table"].offsetHeight + table_margin_top}px'})
+document <= background
+
 
 # Global elements
 cost = document['cost']
