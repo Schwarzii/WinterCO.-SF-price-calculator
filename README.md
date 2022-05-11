@@ -3,6 +3,11 @@
 计算器界面跳转: https://schwarzii.github.io/WinterCO.-SF-price-calculator/interface.html \
 从Gitee平台访问：https://schwarzi.gitee.io/winterco.-sf-price-calculator/interface.html
 
+## 2022/5/11 V1.2.2
+
+- Change interface appearance
+- 更改界面外观
+
 ## 2022/5/10 V1.2.1
 
 Amendments:
