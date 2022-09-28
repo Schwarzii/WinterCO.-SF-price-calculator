@@ -2,46 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.10.5/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.10.7/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.10.7/brython_stdlib.js"></script>
     <title>凛冬联盟顺丰快递价格计算器</title>
 </head>
 <style>
 *{
     font-family: 方正清刻本悦宋简体;
     font-weight: normal;
-    font-size: 1.1em;
+    /*font-size: 1.1em;*/
+    font-size: 26px;
     color: #282e55;
-    /*color: aliceblue;*/
 }
 body{
     background-color: #eedecc;
     background-image: url("Background_texture/cloud_15.png");
     min-height: 100%;
+    max-height: 100vh;
     margin: 0;
 }
 #table{
     position: relative;
-    /*top: 100px;*/
-    margin-top: 40px;
+    top: 40px;
     margin-left: auto;
     margin-right: auto;
-    /*margin-right: auto;*/
-    /*clear: both;*/
     /*background-color: rgba(255, 255, 255, 0.8);*/
+    /*animation: table_left 2s linear forwards;*/
 }
 .shadow{
-    /*position: relative;*/
+    /*position: absolute;*/
     /*top: 0;*/
     /*left: 0;*/
-    /*margin-top: -1000px;*/
-    margin-left: auto;
+    /*padding-top: 40px;*/
+    margin-left: calc(50% - 540px);
     margin-right: auto;
-    /*clear: both;*/
     width: 1080px;
     height: 100vh;
+    display: block;
     /*min-height: 100vh;*/
-    /*height: 2000px;*/
     background: rgba(255, 255, 255, 0.5);
+    transition: margin-left 1s;
+    /*animation: table_left 2s linear forwards;*/
 }
 td{
     background-color: #006e5f;
@@ -55,9 +56,6 @@ td{
     height: 28px;
 }
 th{
-    /*border-color: #1e36d2;*/
-    /*border-width: 1px;*/
-    /*border-style: dashed;*/
     /*font-family: "Palatino Linotype";*/
     padding: 10px 30px 10px 30px;
     text-align: left;
@@ -80,14 +78,15 @@ select{
     width: 187px;
     padding: 10px 30px 10px 30px;
     font-family: "Century Gothic";
+    /*font-family: Papyrus;*/
     margin-left: 2px;
     border-color: #006e5f;
     background-color: transparent;
 }
 option{
     font-family: "Century Gothic";
+    /*font-family: Papyrus;*/
     font-size: 1.05em;
-    /*background-color: transparent;*/
 }
 A{
     padding-left: 20px;
@@ -102,12 +101,9 @@ SUP{
 .title{
     text-align: center;
     font-size: 1.2em;
-    /*border: none;*/
-    /*border-style: solid;*/
     /*border-color: #b1c5b4;*/
     padding-top: 20px;
     padding-bottom: 20px;
-    /*background-color: #b1c5b4;*/
     border-bottom-style: solid;
     border-top-style: solid;
     border-color: #006e5f;
@@ -133,6 +129,18 @@ SUP{
     /*background-color: #952e3a;*/
     /*background-color: #89303f;*/
     background-color: #902A1B;
+}
+.placeholder_cell{
+    background-color: transparent;
+}
+@keyframes table_left {
+    to {transform: translateX(-100px)}
+    /*to {position: absolute; left: 100px}*/
+}
+@keyframes table_right {
+    /*from {transform: translateX(-100px)}*/
+    to {transform: translateX(0px)}
+    /*to {position: absolute; left: 100px}*/
 }
 </style>
 <body onload="brython()">

@@ -1,11 +1,16 @@
-from browser import document, alert, window
+from browser import document, alert, window, ajax
 import browser.html as ht
 
-route = {'Jita': {'4-HWWF': [350, False, 10], 'Otsasai': [250, False, 25], 'K3JR-J': [650, False, 25], 'Oijanen': [500, False, 25]},
-         '4-HWWF': {'Jita': [350, True, 10], 'Otsasai': [250, False, 25], 'Oijanen': [125, False, 25]},
-         'Otsasai': {'Jita': [250, True, 25], '4-HWWF': [250, True, 25]},
-         'K3JR-J': {'Jita': [650, True, 25]},
-         'Oijanen': {'Jita': [700, True, 25], '4-HWWF': [125, True, 25]}
+route = {'Jita': {'4-HWWF': [350, False, 5],
+                  'Otsasai': [250, False, 5],
+                  '5ZXX-K': [600, False, 5],
+                  'N5Y': [800, False, 25],
+                  'BKG': [950, False, 50]},
+         '4-HWWF': {'Jita': [300, True, 10]},
+         'Otsasai': {'Jita': [300, True, 10]},
+         '5ZXX-K': {'Jita': [300, True, 10]},
+         'N5Y': {'Jita': [500, True, 25]},
+         'BKG': {'Jita': [700, True, 50]}
          }  # [Route fee, upstream, minimum fee]
 
 station = {'Jita': 'IV - Moon 4 - Caldari Navy Assembly Plant',
@@ -14,7 +19,10 @@ station = {'Jita': 'IV - Moon 4 - Caldari Navy Assembly Plant',
            'Otsasai': 'Fuxi Prime - Home for Ever',
            'N5Y-4N': 'xingcheng',
            'K3JR-J': "Teski's home",
-           'Oijanen': 'Lowsec jita'}
+           'Oijanen': 'Lowsec jita',
+           '5ZXX-K': 'Northern Protectorate Palace',
+           'N5Y': '',
+           'BKG': ''}
 
 # Global colors
 honghui = '#82878c'  # 红灰
@@ -39,29 +47,29 @@ order <= ht.TR(ht.TD('物品体积') +
                ht.INPUT(id='volume') +
                ht.TD('m' + ht.SUP('3', Class='sup_white'), style={'padding': '10px 30px 10px 30px'}))
 order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral', maxlength=18) + ht.TD('ISK'))
-order <= ht.TR(ht.TD('合同类型') +
-               ht.TD(ht.TD('标准合同', id='s_contract',
-                           style={'width': f'{input_width / 2- 60 - 1}px', 'background-color': maolv}) +
-                     ht.TD('加急合同 (接单24小时内运达)', id='a_contract',
-                           style={'width': f'{input_width / 2 + 120 - 60 - 1}px',
-                                  'position': 'relative',
-                                  'right': '-2px',
-                                  'padding': '10px 30px 10px 30px',
-                                  'background-color': honghui}),
-                     colspan=2, style={'padding': '0px 0px 0px 0px', 'background-color': 'unset'})
-               # + ht.TD('')
-               )
+# order <= ht.TR(ht.TD('合同类型') +
+#                ht.TD(ht.TD('标准合同', id='s_contract',
+#                            style={'width': f'{input_width / 2- 60 - 1}px', 'background-color': maolv}) +
+#                      ht.TD('加急合同 (接单24小时内运达)', id='a_contract',
+#                            style={'width': f'{input_width / 2 + 120 - 60 - 1}px',
+#                                   'position': 'relative',
+#                                   'right': '-2px',
+#                                   'padding': '10px 30px 10px 30px',
+#                                   'background-color': honghui}),
+#                      colspan=2, style={'padding': '0px 0px 0px 0px', 'background-color': 'transparent'})
+#                # + ht.TD('')
+#                )
 order <= ht.TR(ht.TD('收费标准', rowspan=3) +
                ht.A(ht.TD('当前线路价格', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
-                    ht.TH('250 ISK/m' + ht.SUP('3'), id='route_standard',
+                    ht.TH(f'{route[departure.value][arrival.value][0]} ISK/m' + ht.SUP('3'), id='route_standard',
                           style={'width': f'{input_width - 187 - 60 - 4}px'}),
                     Class='charging_rule_A') +
                ht.TD('下行线路', id='stream', rowspan=3, style={'width': '60px', 'background-color': maolv}))
-order <= ht.TR(ht.A(ht.TD('线路起步价', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
+order <= ht.TR(ht.A(ht.TD('线路最低费用', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
                     ht.TH('10M ISK (10,000,000 ISK)', id='min_fee',
                           style={'width': f'{input_width - 187 - 60 - 4}px'}),
                     Class='charging_rule_A'))
-order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px', 'width': '177px', 'height': '68px'}) +
+order <= ht.TR(ht.A(ht.TD('计费标准', style={'padding': '15px 5px 15px 5px', 'width': '177px', 'height': '65px'}) +
                     ht.TH('-', id='other_fee',
                           style={'width': f'{input_width - 187 - 60 - 4}px',
                                  'line-height': '1.3',
@@ -72,14 +80,28 @@ order <= ht.TR(ht.TD('送达时间') + ht.TH('2天内', id='express_time', Class
 order <= ht.TR(ht.TD('支付运费', Class='important') +
                ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': qianghong}) +
                ht.TD('ISK', Class='important'))
+# order <= ht.TR(ht.TD('', Class='placeholder_cell') + ht.TD('查看合同样本', id='contract_preview'))
+order <= ht.TR(ht.TD('test', id='test'))
 pop = ht.DIV('yy', role='alert')
 
-document <= order
-table_margin_top = int(window.getComputedStyle(document["table"]).marginTop.replace('px', ''))
+# document <= order
+# table_margin_top = int(window.getComputedStyle(document["table"]).marginTop.replace('px', ''))
+# background = ht.DIV('', Class='shadow',
+#                     style={'margin-top': f'-{document["table"].offsetHeight + table_margin_top}px'})
+# document <= background
 
-background = ht.DIV('', Class='shadow', style={'margin-top': f'-{document["table"].offsetHeight + table_margin_top}px'})
+background = ht.DIV('', id='order_form', Class='shadow')
+background <= order
+
+background <= ht.TD('查看合同样本 (暂不可用)', id='contract_preview',
+                    style={'display': 'table',
+                           'position': 'relative',
+                           'top': '80px',
+                           'margin': '0 auto',
+                           'background-color': tanxiang})
+# background <= ht.DIV('xx1xxxxxxxxxxxx1', style={'position': 'relative', 'top': '40px'})
+
 document <= background
-
 
 # Global elements
 cost = document['cost']
@@ -95,10 +117,12 @@ highlight_color = qianghong
 
 accelerated = False
 upstream = False
+movement = False
 
 alert_position = 0
 collateral_full = ''
 m = 1e6  # 1 million
+animation_time = 2
 
 
 # Generate available destinations depending on departure
@@ -364,10 +388,37 @@ def accelerated_courier(event):
         select_accelerated()
 
 
+def layout_change(event):
+    global movement
+    table_margin_left = float(window.getComputedStyle(document['order_form']).marginLeft.replace('px', ''))
+    print(table_margin_left)
+    if movement:  # Move back to center position
+        # document['order_form'].style.transform = 'translateX(0)'
+        document['order_form'].style.marginLeft = 'calc(50% - 540px)'
+        movement = False
+    else:
+        # document['order_form'].style.transform = f'translateX(-{table_margin_left - 30}px)'
+        document['order_form'].style.marginLeft = '25px'
+        movement = True
+
+
+def test_connection(ev):
+    ajax.get('test_server.json', mode='json', oncomplete=print_out)
+
+
+def print_out(req):
+    preference = req.json
+    print(preference)
+    print(preference["Me"])
+    print('helloWorld')
+
+
 departure.bind('change', dep_select)
 arrival.bind('change', arr_select)
 document['switch'].bind('click', switch_des)
 document['collateral'].bind('keyup', collateral_fee)
 document['volume'].bind('keyup', volume_fee)
-document['s_contract'].bind('click', standard_courier)
-document['a_contract'].bind('click', accelerated_courier)
+# document['s_contract'].bind('click', standard_courier)
+# document['a_contract'].bind('click', accelerated_courier)
+# document['contract_preview'].bind('click', layout_change)
+document['test'].bind('click', test_connection)
