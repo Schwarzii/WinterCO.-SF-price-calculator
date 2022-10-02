@@ -82,6 +82,7 @@ order <= ht.TR(ht.TD('支付运费', Class='important') +
                ht.TD('ISK', Class='important'))
 # order <= ht.TR(ht.TD('', Class='placeholder_cell') + ht.TD('查看合同样本', id='contract_preview'))
 order <= ht.TR(ht.TD('test', id='test'))
+order <= ht.TR(ht.TD('send', id='send'))
 pop = ht.DIV('yy', role='alert')
 
 # document <= order
@@ -403,14 +404,41 @@ def layout_change(event):
 
 
 def test_connection(ev):
-    ajax.get('test_server.json', mode='json', oncomplete=print_out)
+    ajax.get('write.txt', oncomplete=print_out)
+    with open('write.txt') as r:
+        print(f'read: {r.readline()}')
+    # pass
 
 
 def print_out(req):
-    preference = req.json
-    print(preference)
-    print(preference["Me"])
+    preference = req.text
+    print('ajax:', preference)
+    # print(preference["Me"])
     print('helloWorld')
+
+
+def send_file(ev):
+    # json_str = f'{{"{departure.value}": "{document["volume"].value}"}}'
+    # json_str_2 = f'{{"Me": "22:00", "Peter": "23:00"}}'
+    # print(json_str)
+
+    # file = ajax.Ajax()
+    # file.open('POST', 'test_server.py', True)
+    # file.send({'your_name': 'Piyush', 'company_name': 'Geeks'})
+    # file.bind('complete', print_out)
+    with open('write.txt') as r:
+        a = r.readline()
+        print(a)
+    with open('write.txt', 'w') as f:
+        b = f'{a}, this is a test'
+        print(b)
+        f.write(b)
+
+    # print('hello')
+    # ajax.get("/test_server.py?your_name=Piyush&company_name=GeeksforGeeks", oncomplete=print_out)
+    # pass
+    # for f in document["file_test"].files:
+    #     ajax.file_upload("/cgi-bin/savefile.py", f, oncomplete=print_out)
 
 
 departure.bind('change', dep_select)
@@ -422,3 +450,4 @@ document['volume'].bind('keyup', volume_fee)
 # document['a_contract'].bind('click', accelerated_courier)
 # document['contract_preview'].bind('click', layout_change)
 document['test'].bind('click', test_connection)
+document['send'].bind('click', send_file)
