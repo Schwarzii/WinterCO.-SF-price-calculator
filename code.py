@@ -47,18 +47,18 @@ order <= ht.TR(ht.TD('物品体积') +
                ht.INPUT(id='volume') +
                ht.TD('m' + ht.SUP('3', Class='sup_white'), style={'padding': '10px 30px 10px 30px'}))
 order <= ht.TR(ht.TD('保证金') + ht.INPUT(id='collateral', maxlength=18) + ht.TD('ISK'))
-# order <= ht.TR(ht.TD('合同类型') +
-#                ht.TD(ht.TD('标准合同', id='s_contract',
-#                            style={'width': f'{input_width / 2- 60 - 1}px', 'background-color': maolv}) +
-#                      ht.TD('加急合同 (接单24小时内运达)', id='a_contract',
-#                            style={'width': f'{input_width / 2 + 120 - 60 - 1}px',
-#                                   'position': 'relative',
-#                                   'right': '-2px',
-#                                   'padding': '10px 30px 10px 30px',
-#                                   'background-color': honghui}),
-#                      colspan=2, style={'padding': '0px 0px 0px 0px', 'background-color': 'transparent'})
-#                # + ht.TD('')
-#                )
+order <= ht.TR(ht.TD('合同类型') +
+               ht.TD(ht.TD('标准合同', id='s_contract',
+                           style={'width': f'{input_width / 2- 60 - 1}px', 'background-color': maolv}) +
+                     ht.TD('加急合同 (接单24小时内运达)', id='a_contract',
+                           style={'width': f'{input_width / 2 + 120 - 60 - 1}px',
+                                  'position': 'relative',
+                                  'right': '-2px',
+                                  'padding': '10px 30px 10px 30px',
+                                  'background-color': honghui}),
+                     colspan=2, style={'padding': '0px 0px 0px 0px', 'background-color': 'transparent'})
+               # + ht.TD('')
+               )
 order <= ht.TR(ht.TD('收费标准', rowspan=3) +
                ht.A(ht.TD('当前线路价格', style={'padding': '15px 5px 15px 5px', 'width': '177px'}) +
                     ht.TH(f'{route[departure.value][arrival.value][0]} ISK/m' + ht.SUP('3'), id='route_standard',
@@ -81,8 +81,7 @@ order <= ht.TR(ht.TD('支付运费', Class='important') +
                ht.TH('-', id='cost', style={'text-align': 'center', 'border': 'solid', 'color': qianghong}) +
                ht.TD('ISK', Class='important'))
 # order <= ht.TR(ht.TD('', Class='placeholder_cell') + ht.TD('查看合同样本', id='contract_preview'))
-order <= ht.TR(ht.TD('test', id='test'))
-order <= ht.TR(ht.TD('send', id='send'))
+order <= ht.TR(ht.TD('test', id='test') + ht.TD('send', id='send'))
 pop = ht.DIV('yy', role='alert')
 
 # document <= order
@@ -404,10 +403,7 @@ def layout_change(event):
 
 
 def test_connection(ev):
-    ajax.get('write.txt', oncomplete=print_out)
-    with open('write.txt') as r:
-        print(f'read: {r.readline()}')
-    # pass
+    ajax.get("http://127.0.0.1:5000/?read=true", oncomplete=print_out)
 
 
 def print_out(req):
@@ -423,22 +419,17 @@ def send_file(ev):
     # print(json_str)
 
     # file = ajax.Ajax()
-    # file.open('POST', 'test_server.py', True)
-    # file.send({'your_name': 'Piyush', 'company_name': 'Geeks'})
     # file.bind('complete', print_out)
-    with open('write.txt') as r:
-        a = r.readline()
-        print(a)
-    with open('write.txt', 'w') as f:
-        b = f'{a}, this is a test'
-        print(b)
-        f.write(b)
+    # file.open('POST', 'http://127.0.0.1:5000/update', True)
+    # # file.set_header('content-type', 'application/x-www-form-urlencoded')
+    # # file.set_header('Access-Control-Allow-Origin', '*')
+    # file.send({'your_name': 'Piyush', 'company_name': 'Geeks'})
 
-    # print('hello')
-    # ajax.get("/test_server.py?your_name=Piyush&company_name=GeeksforGeeks", oncomplete=print_out)
-    # pass
-    # for f in document["file_test"].files:
-    #     ajax.file_upload("/cgi-bin/savefile.py", f, oncomplete=print_out)
+    send_data = {'name': f'{departure.value}'}
+    # send_data = json.dumps(send_data)
+    ajax.post('http://127.0.0.1:5000/update', data=send_data)
+
+    # ajax.get("http://127.0.0.1:5000/?read=true", mode='json', oncomplete=print_out)
 
 
 departure.bind('change', dep_select)
